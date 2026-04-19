@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>تم تسجيل الدخول بنجاح - Jibayatic</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: #0b0f19;
+            color: #ffffff;
+            font-family: 'Cairo', sans-serif;
+            text-align: center;
+        }
+        .container {
+            background: #131a2a;
+            padding: 3rem 2rem;
+            border-radius: 1rem;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            max-width: 400px;
+            width: 90%;
+        }
+        .icon {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+            display: inline-block;
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+        h1 {
+            font-size: 1.5rem;
+            margin-top: 0;
+            margin-bottom: 1rem;
+            color: #4f6ef7;
+        }
+        p {
+            color: #a0aec0;
+            font-size: 1rem;
+            line-height: 1.6;
+        }
+        .btn {
+            display: inline-block;
+            margin-top: 2rem;
+            padding: 0.75rem 1.5rem;
+            background: #4f6ef7;
+            color: white;
+            text-decoration: none;
+            border-radius: 0.5rem;
+            font-weight: 600;
+            transition: background 0.2s;
+            cursor: pointer;
+            border: none;
+        }
+        .btn:hover {
+            background: #3a56e0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="icon">✅</div>
+        <h1>تم تسجيل الدخول بنجاح!</h1>
+        <p>لقد تم ربط حسابك في التطبيق.<br>يمكنك الآن إغلاق هذه النافذة أو الرجوع إلى نافذة تطبيق Jibayatic بأمان.</p>
+        <button class="btn" onclick="window.close()">إغلاق هذه النافذة</button>
+    </div>
+
+    <script>
+        // Redirect to the app scheme.
+        // It brings whatever hash or query string it got from Supabase down to the app.
+        setTimeout(() => {
+            let targetUrl = "jibayatic://auth-callback";
+            let params = new URLSearchParams();
+            
+            // 1. استخراج المتغيرات من الـ Search
+            if (window.location.search) {
+                new URLSearchParams(window.location.search).forEach((value, key) => {
+                    params.append(key, value);
+                });
+            }
+            
+            // 2. استخراج المتغيرات من الـ Hash (لأن ويندوز يحذف الـ Hash من الروابط المخصصة)
+            if (window.location.hash) {
+                new URLSearchParams(window.location.hash.substring(1)).forEach((value, key) => {
+                    params.append(key, value);
+                });
+            }
+            
+            const queryString = params.toString();
+            if (queryString) {
+                targetUrl += '?' + queryString;
+            }
+            
+            window.location.href = targetUrl;
+            
+            // Attempt to auto close the window (may be blocked by browser security)
+            setTimeout(() => {
+                window.close();
+            }, 3000);
+        }, 500);
+    </script>
+</body>
+</html>
