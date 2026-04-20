@@ -1,113 +1,164 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>تم تسجيل الدخول بنجاح - Jibayatic</title>
-    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
-    <style>
-        body {
-            margin: 0;
-            padding: 0;
-            height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background-color: #0b0f19;
-            color: #ffffff;
-            font-family: 'Cairo', sans-serif;
-            text-align: center;
-        }
-        .container {
-            background: #131a2a;
-            padding: 3rem 2rem;
-            border-radius: 1rem;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
-            border: 1px solid rgba(255, 255, 255, 0.05);
-            max-width: 400px;
-            width: 90%;
-        }
-        .icon {
-            font-size: 4rem;
-            margin-bottom: 1rem;
-            display: inline-block;
-            animation: pulse 2s infinite;
-        }
-        @keyframes pulse {
-            0% { transform: scale(1); }
-            50% { transform: scale(1.1); }
-            100% { transform: scale(1); }
-        }
-        h1 {
-            font-size: 1.5rem;
-            margin-top: 0;
-            margin-bottom: 1rem;
-            color: #4f6ef7;
-        }
-        p {
-            color: #a0aec0;
-            font-size: 1rem;
-            line-height: 1.6;
-        }
-        .btn {
-            display: inline-block;
-            margin-top: 2rem;
-            padding: 0.75rem 1.5rem;
-            background: #4f6ef7;
-            color: white;
-            text-decoration: none;
-            border-radius: 0.5rem;
-            font-weight: 600;
-            transition: background 0.2s;
-            cursor: pointer;
-            border: none;
-        }
-        .btn:hover {
-            background: #3a56e0;
-        }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>جاري تسجيل الدخول...</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    
+    body {
+      font-family: 'Segoe UI', Tahoma, Arial, sans-serif;
+      background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+      color: white;
+      height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    .container {
+      text-align: center;
+      padding: 40px;
+      background: rgba(255,255,255,0.05);
+      border-radius: 20px;
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255,255,255,0.1);
+      max-width: 400px;
+      width: 90%;
+    }
+    
+    .logo { font-size: 48px; margin-bottom: 20px; }
+    
+    .spinner {
+      width: 50px; height: 50px;
+      border: 4px solid rgba(255,255,255,0.2);
+      border-top-color: #4a9eff;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      margin: 20px auto;
+    }
+    
+    @keyframes spin { to { transform: rotate(360deg); } }
+    
+    .status { font-size: 18px; margin: 15px 0; }
+    .sub-status { font-size: 13px; color: rgba(255,255,255,0.6); }
+    
+    .success-icon { font-size: 60px; display: none; }
+    .error-icon { font-size: 60px; display: none; }
+    
+    .btn {
+      display: none;
+      margin-top: 20px;
+      padding: 12px 30px;
+      background: #4a9eff;
+      color: white;
+      border: none;
+      border-radius: 10px;
+      font-size: 15px;
+      cursor: pointer;
+      text-decoration: none;
+    }
+  </style>
 </head>
 <body>
-    <div class="container">
-        <div class="icon">✅</div>
-        <h1>تم تسجيل الدخول بنجاح!</h1>
-        <p>لقد تم ربط حسابك في التطبيق.<br>يمكنك الآن إغلاق هذه النافذة أو الرجوع إلى نافذة تطبيق Jibayatic بأمان.</p>
-        <button class="btn" onclick="window.close()">إغلاق هذه النافذة</button>
-    </div>
+  <div class="container">
+    <div class="logo">🔐</div>
+    <div class="spinner" id="spinner"></div>
+    <div class="success-icon" id="successIcon">✅</div>
+    <div class="error-icon" id="errorIcon">❌</div>
+    <p class="status" id="statusText">جاري معالجة تسجيل الدخول...</p>
+    <p class="sub-status" id="subStatus">يمكنك إغلاق هذه النافذة بعد لحظات</p>
+    <a class="btn" id="retryBtn" href="#">حاول مرة أخرى</a>
+  </div>
 
-    <script>
-        // Redirect to the app scheme.
-        // It brings whatever hash or query string it got from Supabase down to the app.
+  <script>
+    function updateUI(state, message, subMessage) {
+      const spinner = document.getElementById('spinner');
+      const successIcon = document.getElementById('successIcon');
+      const errorIcon = document.getElementById('errorIcon');
+      const statusText = document.getElementById('statusText');
+      const subStatus = document.getElementById('subStatus');
+      
+      statusText.textContent = message;
+      if (subMessage) subStatus.textContent = subMessage;
+      
+      spinner.style.display = 'none';
+      successIcon.style.display = 'none';
+      errorIcon.style.display = 'none';
+      
+      if (state === 'loading') spinner.style.display = 'block';
+      if (state === 'success') successIcon.style.display = 'block';
+      if (state === 'error') errorIcon.style.display = 'block';
+    }
+    
+    function extractTokens() {
+      // الطريقة 1: Query Parameters (الأكثر شيوعاً)
+      const searchParams = new URLSearchParams(window.location.search);
+      
+      // الطريقة 2: Hash Fragment (Supabase يستخدمه أحياناً)
+      const hashParams = new URLSearchParams(
+        window.location.hash.replace('#', '')
+      );
+      
+      return {
+        accessToken: searchParams.get('access_token') || hashParams.get('access_token'),
+        refreshToken: searchParams.get('refresh_token') || hashParams.get('refresh_token'),
+        error: searchParams.get('error') || hashParams.get('error'),
+        errorDescription: searchParams.get('error_description') || hashParams.get('error_description'),
+        type: searchParams.get('type') || hashParams.get('type')
+      };
+    }
+    
+    function sendToApp(tokens) {
+      // بناء الـ Deep Link
+      const deepLinkUrl = new URL('jibayatic://auth-callback');
+      
+      if (tokens.accessToken) {
+        deepLinkUrl.searchParams.set('access_token', tokens.accessToken);
+      }
+      if (tokens.refreshToken) {
+        deepLinkUrl.searchParams.set('refresh_token', tokens.refreshToken);
+      }
+      if (tokens.error) {
+        deepLinkUrl.searchParams.set('error', tokens.error);
+        deepLinkUrl.searchParams.set('error_description', tokens.errorDescription || '');
+      }
+      
+      console.log('Sending to app:', deepLinkUrl.toString());
+      window.location.href = deepLinkUrl.toString();
+    }
+    
+    window.addEventListener('load', function() {
+      updateUI('loading', 'جاري معالجة تسجيل الدخول...', 'يتم التحقق من بياناتك');
+      
+      const tokens = extractTokens();
+      
+      if (tokens.error) {
+        updateUI('error', 'فشل تسجيل الدخول', tokens.errorDescription || 'حدث خطأ أثناء التحقق');
+        sendToApp(tokens);
+        return;
+      }
+      
+      if (!tokens.accessToken) {
+        updateUI('error', 'لم يتم استلام بيانات الدخول', 'الرجاء المحاولة مرة أخرى من التطبيق');
+        document.getElementById('retryBtn').style.display = 'inline-block';
+        document.getElementById('retryBtn').textContent = 'إغلاق هذه النافذة';
+        document.getElementById('retryBtn').onclick = () => window.close();
+        return;
+      }
+      
+      // نجاح - أرسل للتطبيق
+      updateUI('success', 'تم تسجيل الدخول بنجاح! ✨', 'جاري فتح التطبيق...');
+      
+      // انتظر لثانية لإظهار رسالة النجاح
+      setTimeout(() => {
+        sendToApp(tokens);
         setTimeout(() => {
-            let targetUrl = "jibayatic://auth-callback";
-            let params = new URLSearchParams();
-            
-            // 1. استخراج المتغيرات من الـ Search
-            if (window.location.search) {
-                new URLSearchParams(window.location.search).forEach((value, key) => {
-                    params.append(key, value);
-                });
-            }
-            
-            // 2. استخراج المتغيرات من الـ Hash (لأن ويندوز يحذف الـ Hash من الروابط المخصصة)
-            if (window.location.hash) {
-                new URLSearchParams(window.location.hash.substring(1)).forEach((value, key) => {
-                    params.append(key, value);
-                });
-            }
-            
-            const queryString = params.toString();
-            if (queryString) {
-                targetUrl += '?' + queryString;
-            }
-            
-            window.location.href = targetUrl;
-            
-            // Attempt to auto close the window (may be blocked by browser security)
-            setTimeout(() => {
-                window.close();
-            }, 3000);
-        }, 500);
-    </script>
+          updateUI('success', 'يمكنك إغلاق هذه النافذة', 'تم فتح التطبيق بنجاح ✅');
+        }, 2000);
+      }, 1000);
+    });
+  </script>
 </body>
 </html>
