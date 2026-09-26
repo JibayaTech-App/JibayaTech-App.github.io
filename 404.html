@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>جارٍ التحويل…</title>
+<style>
+  html,body{height:100%;margin:0;background:#020617;color:#e2e8f0;
+    font-family:system-ui,"Segoe UI",Tahoma,sans-serif;display:flex;
+    align-items:center;justify-content:center;text-align:center}
+  .box{max-width:34rem;padding:2rem}
+  h1{font-size:1.25rem;margin:0 0 .5rem}
+  p{margin:.25rem 0;font-size:.9rem;color:#94a3b8}
+  a{color:#60a5fa}
+</style>
+</head>
+<body>
+<div class="box" id="box">
+  <h1>جارٍ فتح الصفحة…</h1>
+  <p>ثانية واحدة.</p>
+</div>
+<script>
+/* 404.html على جذر موقع GitHub Pages.
+ *
+ * لماذا يوجد: GitHub Pages يخدم 404.html لأي مسار لا يطابق ملفاً. ولأن تطبيق
+ * الإدارة (`admin/`) يستخدم BrowserRouter، فإن كل رابط عميق مثل
+ * /admin/release-health ليس ملفاً ⇒ كان يعيد صفحة «غير موجود» من GitHub.
+ * التنقّل داخل التطبيق كان يعمل، أما التحديث أو الرابط المباشر فلا.
+ *
+ * لماذا لا نستخدم HashRouter هنا (كما في الموقع الرئيسي)؟ لأن `/admin/**` حيّ
+ * بأمر مالك معروف، والرابط النظيف مقصود. هذا الملف يحفظه بلا خادم ولا إعداد.
+ *
+ * ⚠️ لا يصلح ناقص: لا يُصلح الموقع الرئيسي (HashRouter ⇒ روابطه لا 404 أبداً)،
+ * ولا ينعكس على site/404 (404.html الجذر بديله).
+ *
+ * انتبه: المفتاح يُقرأ مرة واحدة ثم يُمسح، وإلا قفزت زيارات لاحقة لـ /admin/
+ * إلى route قديم. اسم المفتاح مُبادأ بالمسار حتى لا يختصم الموقع الرئيسي.
+ */
+(function () {
+  var KEY = 'admin-spa-redirect';
+  var path = window.location.pathname;
+
+  // /admin/… ⇒ اللوحة وحدها تستعمل BrowserRouter وتحتاج هذا الجسر
+  if (path === '/admin' || path.indexOf('/admin/') === 0) {
+    var target = path + window.location.search + window.location.hash;
+    // «/admin» بلا شرطة نقطية ⇒ الجذر، لا مسار
+    if (target === '/admin') target = '/admin/';
+    try { window.sessionStorage.setItem(KEY, target); } catch (e) { /* وضع خاص */ }
+    window.location.replace('/admin/');
+    return;
+  }
+
+  // أي مسار آخر: 404 صادق. لا تخمين ولا تحويل.
+  // ⛔ العنوان أيضاً: ترك «جارٍ التحويل» لصفحة لا تحوّل = وعد كاذب ينتظره
+  // المستخدم بلا نهاية. العنوان part من الصدق.
+  document.title = 'الصفحة غير موجودة';
+  document.getElementById('box').innerHTML =
+    '<h1>الصفحة غير موجودة</h1>' +
+    '<p>العنوان <span dir="ltr">' + path.replace(/</g, '&lt;') + '</span> غير متاح.</p>' +
+    '<p><a href="/">العودة إلى الصفحة الرئيسية</a></p>';
+})();
+</script>
+</body>
+</html>
