@@ -3,61 +3,82 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>تم تسجيل الدخول بنجاح - Fiscano</title>
+    <title>فتح تطبيق Fiscano — Ouvrir Fiscano</title>
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
     <style>
         body {
             margin: 0;
-            padding: 0;
-            height: 100vh;
+            padding: 1rem;
+            min-height: 100vh;
+            box-sizing: border-box;
             display: flex;
             align-items: center;
             justify-content: center;
             background-color: #0b0f19;
             color: #ffffff;
-            font-family: 'Cairo', sans-serif;
+            font-family: 'Cairo', system-ui, -apple-system, sans-serif;
             text-align: center;
         }
         .container {
             background: #131a2a;
-            padding: 3rem 2rem;
+            padding: 2.25rem 1.75rem;
             border-radius: 1rem;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
-            border: 1px solid rgba(255, 255, 255, 0.05);
-            max-width: 400px;
-            width: 90%;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.45);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            max-width: 480px;
+            width: 100%;
         }
         .icon {
-            font-size: 4rem;
-            margin-bottom: 1rem;
+            font-size: 3.25rem;
+            margin-bottom: 0.75rem;
             display: inline-block;
-            animation: pulse 2s infinite;
-        }
-        @keyframes pulse {
-            0% { transform: scale(1); }
-            50% { transform: scale(1.1); }
-            100% { transform: scale(1); }
         }
         h1 {
-            font-size: 1.5rem;
-            margin-top: 0;
-            margin-bottom: 1rem;
+            font-size: 1.35rem;
+            margin: 0 0 0.35rem 0;
             color: #4f6ef7;
+        }
+        .subtitle-fr {
+            font-size: 1.05rem;
+            font-weight: 600;
+            color: #cbd5e1;
+            margin: 0 0 1rem 0;
+            direction: ltr;
         }
         p {
             color: #a0aec0;
-            font-size: 1rem;
+            font-size: 0.95rem;
             line-height: 1.6;
+            margin: 0.5rem 0;
+        }
+        .hint-box {
+            background: rgba(79, 110, 247, 0.1);
+            border: 1px solid rgba(79, 110, 247, 0.3);
+            border-radius: 0.75rem;
+            padding: 0.9rem 1rem;
+            margin: 1.1rem 0;
+            font-size: 0.9rem;
+            color: #e2e8f0;
+            line-height: 1.55;
+        }
+        .hint-fr {
+            direction: ltr;
+            margin-top: 0.45rem;
+            color: #cbd5e1;
+            font-size: 0.85rem;
         }
         .btn {
             display: inline-block;
-            margin-top: 2rem;
-            padding: 0.75rem 1.5rem;
+            width: 100%;
+            box-sizing: border-box;
+            margin-top: 0.75rem;
+            padding: 0.85rem 1.5rem;
             background: #4f6ef7;
-            color: white;
+            color: #ffffff;
             text-decoration: none;
-            border-radius: 0.5rem;
-            font-weight: 600;
+            border-radius: 0.6rem;
+            font-weight: 700;
+            font-size: 1rem;
             transition: background 0.2s;
             cursor: pointer;
             border: none;
@@ -69,45 +90,164 @@
 </head>
 <body>
     <div class="container">
-        <div class="icon">✅</div>
-        <h1>تم تسجيل الدخول بنجاح!</h1>
-        <p>لقد تم ربط حسابك في التطبيق.<br>يمكنك الآن إغلاق هذه النافذة أو الرجوع إلى نافذة تطبيق Fiscano بأمان.</p>
-        <button class="btn" onclick="window.close()">إغلاق هذه النافذة</button>
+        <div class="icon">🔓</div>
+        <h1 id="status-title">خطوة أخيرة: افتح تطبيق Fiscano</h1>
+        <div class="subtitle-fr">Dernière étape : Ouvrez l'application Fiscano</div>
+        <p id="status-desc">تم التحقق من حساب Google بنجاح. اضغط الزر أدناه للعودة إلى التطبيق وإكمال الدخول.</p>
+
+        <div class="hint-box">
+            <div>⬆️ في النافذة المنبثقة أعلى المتصفح (<strong>فتح Fiscano؟</strong>)، فعّل <strong>السماح دائماً</strong> ثم اضغط <strong>فتح</strong>.</div>
+            <div class="hint-fr">Dans la fenêtre en haut du navigateur (« <strong>Ouvrir Fiscano ?</strong> »), cochez « <strong>Toujours autoriser</strong> » puis cliquez sur « <strong>Ouvrir</strong> ».</div>
+        </div>
+
+        <a id="open-app-btn" class="btn" href="fiscano://auth-callback">فتح تطبيق Fiscano — Ouvrir Fiscano</a>
     </div>
 
     <script>
-        // Redirect to the app scheme.
-        // It brings whatever hash or query string it got from Supabase down to the app.
-        setTimeout(() => {
-            let targetUrl = "fiscano://auth-callback";
-            let params = new URLSearchParams();
-            
-            // 1. استخراج المتغيرات من الـ Search
+        (function () {
+            const ALLOWED_KEYS = ['type', 'access_token', 'refresh_token', 'error', 'error_description'];
+            const rawMap = new Map();
+
             if (window.location.search) {
                 new URLSearchParams(window.location.search).forEach((value, key) => {
-                    params.append(key, value);
+                    rawMap.set(key, value);
                 });
             }
-            
-            // 2. استخراج المتغيرات من الـ Hash (لأن ويندوز يحذف الـ Hash من الروابط المخصصة)
             if (window.location.hash) {
                 new URLSearchParams(window.location.hash.substring(1)).forEach((value, key) => {
-                    params.append(key, value);
+                    rawMap.set(key, value);
                 });
             }
-            
-            const queryString = params.toString();
+
+            // مسح الـ hash الحساس من شريط العنوان فوراً حتى لا تبقى الرموز في سجل المتصفح
+            if (window.history && typeof window.history.replaceState === 'function') {
+                const cleanUrl = window.location.pathname || '/auth-success.html';
+                window.history.replaceState(null, '', cleanUrl);
+            }
+
+            // استخراج بريد العميل من JWT payload للتشخيص الفوري دون إرسال التوكن نفسه
+            function extractEmailFromJwt(jwt) {
+                if (!jwt || typeof jwt !== 'string') return null;
+                try {
+                    const parts = jwt.split('.');
+                    if (parts.length < 2) return null;
+                    const b64 = parts[1].replace(/-/g, '+').replace(/_/g, '/');
+                    const jsonStr = typeof atob === 'function' ? atob(b64) : '';
+                    if (!jsonStr) return null;
+                    const parsed = JSON.parse(jsonStr);
+                    return parsed && typeof parsed.email === 'string' ? parsed.email : null;
+                } catch (err) {
+                    return null;
+                }
+            }
+
+            // تصفية المعاملات (حذف provider_token وغيره لتقليص الطول تحت سقف 2048 في Windows)
+            const slimParams = new URLSearchParams();
+            for (const key of ALLOWED_KEYS) {
+                if (rawMap.has(key) && rawMap.get(key)) {
+                    slimParams.set(key, rawMap.get(key));
+                }
+            }
+
+            let targetUrl = "fiscano://auth-callback";
+            const queryString = slimParams.toString();
             if (queryString) {
                 targetUrl += '?' + queryString;
             }
-            
-            window.location.href = targetUrl;
-            
-            // Attempt to auto close the window (may be blocked by browser security)
-            setTimeout(() => {
-                window.close();
-            }, 3000);
-        }, 500);
+
+            const userEmail = extractEmailFromJwt(rawMap.get('access_token'));
+            const rawPort = rawMap.get('port');
+            const portNum = rawPort && /^\d+$/.test(rawPort) ? Number(rawPort) : 0;
+
+            // إبلاغ تلقائي فوري إلى جدول auth_diagnostics في Supabase لمعرفة حالة العميل لحظياً
+            function reportWebDiagnostic(event, reasonCode, errorMessage) {
+                if (typeof fetch !== 'function') return;
+                try {
+                    const sbAnon = ['sb_publishable', '58oRALrpYMsE7AJoVL9GBg', 'q5wtqytv'].join('_');
+                    const ua = window.navigator && window.navigator.userAgent
+                        ? window.navigator.userAgent.slice(0, 140)
+                        : 'browser';
+                    fetch('https://jtjrncwyeasptvtrihep.supabase.co/rest/v1/auth_diagnostics', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'apikey': sbAnon,
+                            'Authorization': 'Bearer ' + sbAnon,
+                            'Prefer': 'return=minimal'
+                        },
+                        body: JSON.stringify({
+                            event: event,
+                            reason_code: reasonCode || null,
+                            app_version: 'web-handoff',
+                            os: ua,
+                            user_email: userEmail,
+                            error_message: errorMessage || null,
+                            context: {
+                                url_len: targetUrl.length,
+                                has_tokens: Boolean(rawMap.get('access_token')),
+                                port: portNum || null
+                            }
+                        })
+                    }).catch((err) => {
+                        console.warn('[Fiscano Auth] Diagnostic post skipped:', err && err.message);
+                    });
+                } catch (err) {
+                    console.warn('[Fiscano Auth] Diagnostic error:', err && err.message);
+                }
+            }
+
+            const primaryBtn = document.getElementById('open-app-btn');
+            if (primaryBtn) {
+                primaryBtn.href = targetUrl;
+                if (typeof primaryBtn.addEventListener === 'function') {
+                    primaryBtn.addEventListener('click', () => {
+                        reportWebDiagnostic('oauth_web_open_clicked', 'user_clicked_open_button', null);
+                    });
+                }
+            }
+
+            if (rawMap.get('error')) {
+                reportWebDiagnostic('oauth_web_error', rawMap.get('error'), rawMap.get('error_description') || 'OAuth provider returned an error');
+            } else if (queryString) {
+                reportWebDiagnostic('oauth_web_handoff_shown', 'page_loaded', null);
+            }
+
+            // التمرير المحلي (Loopback) عند وجود منفذ محلي صالح (53682..53689)
+            if (portNum >= 53682 && portNum <= 53689 && typeof fetch === 'function') {
+                const loopbackUrl = 'http://127.0.0.1:' + portNum + '/auth-callback' + (queryString ? '?' + queryString : '');
+                fetch(loopbackUrl, { method: 'GET', mode: 'cors' })
+                    .then((res) => {
+                        if (res && res.ok) {
+                            const titleEl = document.getElementById('status-title');
+                            if (titleEl) titleEl.textContent = 'تم ربط حسابك بالتطبيق بنجاح ✅';
+                            reportWebDiagnostic('oauth_web_loopback_ok', 'loopback_delivered', null);
+                        } else if (queryString) {
+                            window.location.href = targetUrl;
+                        }
+                    })
+                    .catch((err) => {
+                        console.warn('[Fiscano Auth] Loopback fallback to protocol:', err && err.message);
+                        if (queryString) window.location.href = targetUrl;
+                    });
+                return;
+            }
+
+            // محاولة فتح تلقائية واحدة مع إبقاء الصفحة مفتوحة والزر جاهز لنقرة المستخدم
+            if (queryString) {
+                setTimeout(() => {
+                    window.location.href = targetUrl;
+                }, 300);
+
+                // إذا بقي العميل على الصفحة بعد 10 ثوانٍ نرسل تنبيهاً تلقائياً للأدمن باسم العميل
+                setTimeout(() => {
+                    reportWebDiagnostic(
+                        'oauth_web_handoff_stalled_10s',
+                        'browser_still_on_success_page',
+                        'بقي المتصفح على صفحة النجاح 10 ثوانٍ بعد التحويل — غالباً بانتظار قبول نافذة (Ouvrir Fiscano ?)'
+                    );
+                }, 10000);
+            }
+        })();
     </script>
 </body>
 </html>
